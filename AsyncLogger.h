@@ -3,6 +3,7 @@
 #include <queue>
 #include <condition_variable>
 #include <mutex>
+#include <atomic>
 #include "FileWriter.h"
 
 /*
@@ -15,7 +16,8 @@ class AsyncLogger {
 public:
 	AsyncLogger();
 	~AsyncLogger();
-	void dataPush(std::string& msg);         //生产者入队
+	void dataPush(std::string msg);         //生产者入队
+	int getDropCount() const;                      //返回丢掉的日志数目
 
 private:
 	//std::thread pushData;
@@ -25,6 +27,9 @@ private:
 	FileWriter fileW;
 	std::mutex mtx;
 	bool quit = false;
+	const size_t queue_max_size = 10000;       //队列最大容量
+	std::atomic<int> drop_count{ 0 };
+
 
 	void workloop();         //工作函数
 };
