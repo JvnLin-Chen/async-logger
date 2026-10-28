@@ -121,8 +121,8 @@ int main(int argc, char** argv) {
 	//else if (mode == "2") Test2_MultiThread();
 	//else if (mode == "3") Test3_IdleCpu();
 	//else std::cout << "ÓÃ·¨: " << argv[0] << " [1|2|3]\n";
-	//Test2_MultiThread();
-	Test3_IdleCpu();
+	Test2_MultiThread();
+	//Test3_IdleCpu();
 
 	system("pause");
 	return 0;

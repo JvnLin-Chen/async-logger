@@ -1,5 +1,20 @@
 #include "FileWriter.h"
 
+FileWriter::FileWriter() {
+	currentDate = GetTime("%Y-%m-%d");
+
+	std::string path = GetPath();
+	char FilePath[512] = { 0 };
+	std::snprintf(FilePath, sizeof(FilePath), "%s\\%s.txt", path.c_str(), currentDate.c_str());
+	fopen_s(&file, FilePath, "a");
+}
+
+FileWriter::~FileWriter() {
+	//关闭文件
+	if(file != nullptr)
+	   fclose(file);
+}
+
 std::string FileWriter::GetTime(const char* fmt) {
 	time_t t = time(0);
 	struct tm tm_buf;
@@ -16,24 +31,41 @@ std::string FileWriter::GetPath() {
 	return std::string(modulePath);
 }
 
+void FileWriter::openIfNeeded() {
+	std::string date = GetTime("%Y-%m-%d");
+	if (date == currentDate && file != nullptr)
+		return;
+	else {
+		//file之前也可能是空指针，所以一样要进行空指针判断，或者说之前没办法打开文件,导致file变成空指针，这个也要检查
+		FILE* newFile = nullptr;
+		std::string path = GetPath();
+		char FilePath[512] = { 0 };
+		std::snprintf(FilePath, sizeof(FilePath), "%s\\%s.txt", path.c_str(), date.c_str());
+		errno_t err = fopen_s(&newFile, FilePath, "a");
+		if (err != 0 || newFile == nullptr)    //文件没办法打开
+		{
+			printf("Error: 无法打开日志文件 %s\n", FilePath);
+			return;
+		}
+		else
+		{
+			fclose(file);     //成功打开后就关闭旧文件，获取新文件句柄
+		}
+		file = newFile;
+		currentDate = date;
+	}
+}
 
 //
 void FileWriter::addLog(std::string str) {
-	//打开文件
-	std::string date = GetTime("%Y-%m-%d");
-	std::string time = GetTime("%Y-%m-%d %H:%M:%S");
-	std::string path = GetPath();
-	char FilePath[512] = { 0 };
-	std::snprintf(FilePath, sizeof(FilePath), "%s\\%s.txt", path.c_str(), date.c_str());
-	FILE* file;
 
-	errno_t err = fopen_s(&file, FilePath, "a");
-	if (err != 0 || file == nullptr) return;
+	openIfNeeded();
+	//空指针判断
+	if (file == nullptr) return;
+
+	std::string time = GetTime("%Y-%m-%d %H:%M:%S");
 
 	std::string timeWithstr = "[" + time + "]--" + str + "\n";
 	//写入日志内容
 	fprintf(file, "%s", timeWithstr.c_str());
-
-	//关闭文件
-	fclose(file);
 }
