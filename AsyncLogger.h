@@ -5,6 +5,7 @@
 #include <mutex>
 #include <atomic>
 #include "FileWriter.h"
+#define QUEUE_FLUSH_SIZE  1000
 
 /*
 需要一个线程变量，消费者线程
@@ -29,6 +30,7 @@ private:
 	bool quit = false;
 	const size_t queue_max_size = 10000;       //队列最大容量
 	std::atomic<int> drop_count{ 0 };
+	//int queue_flush_count;
 
 
 	void workloop();         //工作函数
